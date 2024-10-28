@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File to Discord - DedSec Style</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+    <div class="container">
+        <h1>Upload a File</h1>
+        <form id="uploadForm" action="https://discord-bot-5gdn.onrender.com/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" id="fileInput" required aria-label="Upload File">
+            <button type="submit" aria-label="Submit File">Upload</button>
+        </form>
+        <div id="loader" style="display: none;">Uploading...</div>
+        <div id="responseMessage" class="message"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const responseMessage = document.getElementById('responseMessage');
+        const fileInput = document.getElementById('fileInput');
+        const loader = document.getElementById('loader');
+
+        const MAX_FILE_SIZE = 25 * 1024 * 1024;
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (fileInput.files[0] && fileInput.files[0].size > MAX_FILE_SIZE) {
+                responseMessage.textContent = 'File size exceeds 25 MB limit. Please choose a smaller file.';
+                responseMessage.className = 'message error';
+                return;
+            }
+
+            const formData = new FormData(form);
+            loader.style.display = 'block'; // Show loader
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                const text = await response.text();
+                if (response.ok) {
+                    responseMessage.textContent = text;
+                    responseMessage.className = 'message';
+                } else {
+                    responseMessage.textContent = text;
+                    responseMessage.className = 'message error';
+                }
+            } catch (error) {
+                responseMessage.textContent = 'Error uploading file. Please try again.';
+                responseMessage.className = 'message error';
+            } finally {
+                loader.style.display = 'none'; // Hide loader
+            }
+        });
+    </script>
+</body>
+</html>
